@@ -6,7 +6,7 @@ services:
     restart: always
     environment:
       - POSTGRES_PASSWORD=postgres
-    container_name: postgres
+    container_name: postgres_rest
     volumes:
       - "/data/postgres"
     ports:
