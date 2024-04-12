@@ -9,7 +9,7 @@ import { CurrentUser } from "src/auth/decorators/user.decorator";
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   @Get(":id")
-  async getProfiler(@Param() id: string) {
+  async getProfiler(@Param("id") id: string) {
     const profileId = Number(id);
     return this.usersService.getProfile(profileId);
   }

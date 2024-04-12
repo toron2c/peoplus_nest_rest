@@ -7,7 +7,7 @@ import { PrismaService } from "src/prisma.service";
 import { AuthDto } from "./dto/auth.dto";
 import { hash, verify } from "argon2";
 import { JwtService } from "@nestjs/jwt";
-import { User, Profile } from "@prisma/client";
+import { User } from "@prisma/client";
 import { UsersService } from "src/users/users.service";
 
 @Injectable()
@@ -29,12 +29,20 @@ export class AuthService {
         },
       });
       const tokens = await this.genTokens(newUser.id);
-      const profile: Profile = await this.prisma.profile.create({
+      const profile = await this.prisma.profile.create({
         data: {
           userId: newUser.id,
         },
       });
-      console.log(profile);
+      await this.prisma.user.update({
+        where: {
+          id: newUser.id,
+        },
+        data: {
+          profileId: profile.id,
+        },
+      });
+
       return {
         user: await this.returnUserFields(newUser),
         ...tokens,

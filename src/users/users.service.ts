@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { Profile, User } from "@prisma/client";
 import { PrismaService } from "src/prisma.service";
@@ -28,6 +29,7 @@ export class UsersService {
         id: true,
         email: true,
         password: false,
+        profileId: true,
       },
     });
   }
