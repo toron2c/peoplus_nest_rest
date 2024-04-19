@@ -13,6 +13,7 @@ import { CurrentUser } from "src/auth/decorators/user.decorator";
 import { AllPostsDto } from "./dto/get-all-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { RemovePostDto } from "./dto/remove-post.dto";
+import { UpdateLikeOnPostDto } from "./dto/update-like-on-post.dto";
 
 @Controller("posts")
 export class PostsController {
@@ -77,5 +78,15 @@ export class PostsController {
       postId: Number(postId),
     };
     return await this.postsService.removePost(data);
+  }
+
+  @Patch("id:id")
+  @Auth()
+  async changeStateLike(
+    @Param("id") postId: string,
+    @CurrentUser("profileId") profileId: number,
+  ) {
+    const data: UpdateLikeOnPostDto = { postId: Number(postId), profileId };
+    return await this.postsService.changeStateLikeOnPost(data);
   }
 }

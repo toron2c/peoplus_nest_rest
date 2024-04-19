@@ -10,6 +10,7 @@ import { CreatePostDto } from "./dto/create-post.dto";
 import { AllPostsDto } from "./dto/get-all-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { RemovePostDto } from "./dto/remove-post.dto";
+import { UpdateLikeOnPostDto } from "./dto/update-like-on-post.dto";
 
 @Injectable()
 export class PostsService {
@@ -47,6 +48,13 @@ export class PostsService {
         authorId: data.authorId,
         text: data.text,
       },
+      include: {
+        _count: {
+          select: {
+            likes: true,
+          },
+        },
+      },
     });
     return post;
   }
@@ -56,8 +64,12 @@ export class PostsService {
    * @returns count post profile
    */
   async getCountPosts(profileId: number): Promise<number> {
-    const posts = await this.getAllPosts(profileId);
-    return posts.length;
+    const postsCount = await this.prisma.post.count({
+      where: {
+        authorId: profileId,
+      },
+    });
+    return postsCount;
   }
 
   /**
@@ -83,6 +95,36 @@ export class PostsService {
     });
   }
 
+  async changeStateLikeOnPost(data: UpdateLikeOnPostDto) {
+    const like = await this.prisma.likes.findUnique({
+      where: {
+        userId_postId: {
+          userId: data.profileId,
+          postId: data.postId,
+        },
+      },
+    });
+    if (like) {
+      await this.prisma.likes.delete({
+        where: {
+          userId_postId: {
+            userId: data.profileId,
+            postId: data.postId,
+          },
+        },
+      });
+      return 0;
+    } else {
+      await this.prisma.likes.create({
+        data: {
+          userId: data.profileId,
+          postId: data.postId,
+        },
+      });
+      return 1;
+    }
+  }
+
   /**
    *func get all posts an profileId
    * @param profileId Id profile
@@ -98,6 +140,13 @@ export class PostsService {
         authorId: profileId,
       },
       ...limit,
+      include: {
+        _count: {
+          select: {
+            likes: true,
+          },
+        },
+      },
     });
     if (posts.length === 0) throw new BadRequestException("Posts not found");
     return posts;
@@ -116,6 +165,14 @@ export class PostsService {
       },
       data: {
         text: text,
+        edited: true,
+      },
+      include: {
+        _count: {
+          select: {
+            likes: true,
+          },
+        },
       },
     });
     return post;

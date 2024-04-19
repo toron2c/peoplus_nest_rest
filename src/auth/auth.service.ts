@@ -48,7 +48,7 @@ export class AuthService {
         ...tokens,
       };
     } catch (e) {
-      console.log(e);
+      throw new BadRequestException(e);
     }
   }
 
