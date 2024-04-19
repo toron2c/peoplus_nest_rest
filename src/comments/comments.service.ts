@@ -6,18 +6,21 @@ import {
 import { PrismaService } from "src/prisma.service";
 import { CommentCreateDto } from "./dto/comment-create.dto";
 import { CommentUpdateDto } from "./dto/comment-update.dto";
+import { CommentRemoveDto } from "./dto/comment-remove.dto";
+import { CommentsGet } from "./dto/comments-get.dto";
 
 @Injectable()
 export class CommentsService {
   constructor(private readonly prisma: PrismaService) {}
-  async getComments(postId: number, skip: number) {
+
+  async getComments(data: CommentsGet) {
     const limit = {
       take: -3,
-      skip: skip,
+      skip: data.skip,
     };
     const comments = await this.prisma.comment.findMany({
       where: {
-        postId: postId,
+        postId: data.postId,
       },
       ...limit,
     });
@@ -48,8 +51,8 @@ export class CommentsService {
     return comment;
   }
 
-  async removeComment(data: CommentUpdateDto) {
-    await this.validateAuthor(data.authorId, data.commentId);
+  async removeComment(data: CommentRemoveDto) {
+    await this.validateAuthor(data.profileId, data.commentId);
     const comment = await this.prisma.comment.delete({
       where: {
         id: data.commentId,
@@ -65,7 +68,7 @@ export class CommentsService {
           id: commentId,
         },
       });
-      if (!post) throw new BadRequestException("Post not found!");
+      if (!post) throw new BadRequestException("Comment not found!");
       if (post.authorId !== authorId) {
         throw new UnauthorizedException("Error authorization");
       }
