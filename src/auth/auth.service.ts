@@ -44,10 +44,15 @@ export class AuthService {
       });
 
       return {
-        user: await this.returnUserFields(newUser),
-        ...tokens,
+        User: {
+          ...(await this.returnUserFields(newUser)),
+          profileId: profile.id,
+          name: profile.name,
+        },
+        tokens,
       };
     } catch (e) {
+      console.log(dto, e);
       throw new BadRequestException(e);
     }
   }
@@ -55,9 +60,18 @@ export class AuthService {
   async login(dto: AuthDto) {
     const user = await this.validateUser(dto);
     const tokens = await this.genTokens(user.id);
+    const profile = await this.prisma.profile.findUnique({
+      where: {
+        userId: user.id,
+      },
+    });
     return {
-      user: await this.returnUserFields(user),
-      ...tokens,
+      User: {
+        ...(await this.returnUserFields(user)),
+        profileId: profile.id,
+        name: profile.name,
+      },
+      tokens,
     };
   }
 
@@ -93,7 +107,7 @@ export class AuthService {
 
   private async returnUserFields(user: { email: string; id: string }) {
     return {
-      id: user.id,
+      uid: user.id,
       email: user.email,
     };
   }

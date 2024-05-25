@@ -18,21 +18,22 @@ export class AuthController {
 
   @HttpCode(200)
   @UsePipes(new ValidationPipe())
-  @Post("register")
+  @Post("/register")
   async register(@Body() userData: AuthDto) {
-    return this.authService.register(userData);
+    console.log(userData);
+    return await this.authService.register(userData);
   }
   @HttpCode(200)
   @UsePipes(new ValidationPipe())
   @Post("login")
   async login(@Body() userData: AuthDto) {
-    return this.authService.login(userData);
+    return await this.authService.login(userData);
   }
   @Auth()
   @HttpCode(200)
   @UsePipes(new ValidationPipe())
   @Post("login/refresh-token")
   async loginAccessToken(@Body() token: RefreshTokenDto) {
-    return this.authService.getNewTokens(token.refreshToken);
+    return await this.authService.getNewTokens(token.refreshToken);
   }
 }
