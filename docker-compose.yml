@@ -40,4 +40,4 @@ services:
 networks:
   default:
     external:
-      name: peoplus_server_nest_default
+      name: peoplus_graphql_server_default
